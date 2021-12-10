@@ -1,4 +1,5 @@
 import './App.css';
+import Day10 from './components/Day10';
 import Day3 from './components/Day3';
 import Day4 from './components/Day4';
 import Day5 from './components/Day5';
@@ -18,6 +19,7 @@ function App() {
       <Day7 />
       <Day8 />
       <Day9 />
+      <Day10 />
     </div>
   );
 }
