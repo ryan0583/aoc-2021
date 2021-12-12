@@ -8,7 +8,7 @@ const Day12 = () => {
   const [part1Result, setPart1Result] = useState();
   const [part2Result, setPart2Result] = useState();
 
-  const appendPaths = (point, pathSoFar, pathParts, paths) => {
+  const appendPathsPart1 = (point, pathSoFar, pathParts, paths) => {
     if (point === point.toLowerCase() && pathSoFar.includes(point)) {
       return;
     }
@@ -18,16 +18,43 @@ const Day12 = () => {
       return;
     }
 
-    let newPath = pathSoFar ? `${pathSoFar}-${point}` : `${point}`;
+    let newPath = [...pathSoFar, point];
 
     const nextPoints = pathParts[point];
 
     nextPoints.forEach((nextPoint) => {
-      appendPaths(nextPoint, newPath, pathParts, paths);
+      appendPathsPart1(nextPoint, newPath, pathParts, paths);
     });
   };
 
-  const findPart1Answer = () => {
+  const appendPathsPart2 = (point, pathSoFar, pathParts, paths) => {
+    if (point === 'end') {
+      paths.push(pathSoFar);
+      return;
+    }
+
+    if (point === 'start' && pathSoFar.includes(point)) {
+      return;
+    }
+
+    if (point === point.toLowerCase() && pathSoFar.includes(point)) {
+      const existingSmallCaves = pathSoFar.filter((c) => c === c.toLowerCase());
+
+      if ([...new Set(existingSmallCaves)].length < existingSmallCaves.length) {
+        return;
+      }
+    }
+
+    let newPath = [...pathSoFar, point];
+
+    const nextPoints = pathParts[point];
+
+    nextPoints.forEach((nextPoint) => {
+      appendPathsPart2(nextPoint, newPath, pathParts, paths);
+    });
+  };
+
+  const common = () => {
     console.log(input);
 
     const pathParts = {};
@@ -51,13 +78,24 @@ const Day12 = () => {
       }
     });
 
+    return pathParts;
+  };
+
+  const findPart1Answer = () => {
+    const pathParts = common();
     const paths = [];
-    appendPaths('start', '', pathParts, paths);
+    appendPathsPart1('start', [], pathParts, paths);
 
     setPart1Result(paths.length);
   };
 
-  const findPart2Answer = () => {};
+  const findPart2Answer = () => {
+    const pathParts = common();
+    const paths = [];
+    appendPathsPart2('start', [], pathParts, paths);
+
+    setPart2Result(paths.length);
+  };
 
   useEffect(() => {
     if (part === 1) {
