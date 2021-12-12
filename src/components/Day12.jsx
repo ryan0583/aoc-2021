@@ -8,97 +8,53 @@ const Day12 = () => {
   const [part1Result, setPart1Result] = useState();
   const [part2Result, setPart2Result] = useState();
 
+  const appendPaths = (point, pathSoFar, pathParts, paths) => {
+    if (point === point.toLowerCase() && pathSoFar.includes(point)) {
+      return;
+    }
+
+    if (point === 'end') {
+      paths.push(pathSoFar);
+      return;
+    }
+
+    let newPath = pathSoFar ? `${pathSoFar}-${point}` : `${point}`;
+
+    const nextPoints = pathParts[point];
+
+    nextPoints.forEach((nextPoint) => {
+      appendPaths(nextPoint, newPath, pathParts, paths);
+    });
+  };
+
   const findPart1Answer = () => {
     console.log(input);
 
-    const pathParts = input.map((row) => {
+    const pathParts = {};
+
+    input.forEach((row) => {
       const dashIndex = row.indexOf('-');
-      return {
-        a: row.slice(0, dashIndex),
-        b: row.slice(dashIndex + 1),
-      };
+
+      const a = row.slice(0, dashIndex);
+      const b = row.slice(dashIndex + 1);
+
+      if (pathParts[a]) {
+        pathParts[a].push(b);
+      } else {
+        pathParts[a] = [b];
+      }
+
+      if (pathParts[b]) {
+        pathParts[b].push(a);
+      } else {
+        pathParts[b] = [a];
+      }
     });
 
-    console.log(pathParts);
+    const paths = [];
+    appendPaths('start', '', pathParts, paths);
 
-    let nextCaves = ['start'];
-
-    let pathsToCheck = ['start'];
-
-    let paths = [...pathsToCheck];
-
-    let lastPaths = [];
-
-    let concludedPaths = [];
-
-    while (!paths.every((path) => lastPaths.includes(path))) {
-      console.log('Processing...');
-      lastPaths = [...paths];
-      const nextNextCaves = [];
-      let nextPaths = [];
-
-      nextCaves.forEach((cave) => {
-        if (cave !== 'end') {
-          const pathPartsWithCave = pathParts.filter(
-            (pathPart) => pathPart.a === cave || pathPart.b === cave
-          );
-
-          const nextLetters = pathPartsWithCave.map((pathPart) =>
-            pathPart.a === cave ? pathPart.b : pathPart.a
-          );
-
-          nextLetters.forEach((nextLetter) => {
-            if (nextLetter !== 'start') {
-              let added = false;
-
-              nextPaths.push(
-                ...pathsToCheck.map((path) => {
-                  if (
-                    path.includes(cave) &&
-                    path.slice(
-                      path.lastIndexOf('-') > 0 ? path.lastIndexOf('-') + 1 : 0
-                    ) === cave &&
-                    (nextLetter !== nextLetter.toLowerCase() ||
-                      !path.includes(nextLetter))
-                  ) {
-                    added = true;
-                    return `${path}-${nextLetter}`;
-                  }
-                  return path;
-                })
-              );
-
-              if (added) {
-                nextNextCaves.push(nextLetter);
-              }
-            }
-          });
-
-          const uniqueNextPaths = [...new Set(nextPaths)];
-
-          concludedPaths = [
-            ...new Set([
-              ...concludedPaths,
-              ...uniqueNextPaths.filter((path) => path.includes('end')),
-            ]),
-          ];
-
-          pathsToCheck = [
-            ...uniqueNextPaths.filter((path) => !path.includes('end')),
-          ];
-
-          console.log(pathsToCheck);
-
-          paths = [...concludedPaths, ...pathsToCheck];
-
-          nextPaths = [];
-        }
-      });
-
-      nextCaves = [...new Set(nextNextCaves)];
-    }
-
-    console.log(concludedPaths);
+    setPart1Result(paths.length);
   };
 
   const findPart2Answer = () => {};
