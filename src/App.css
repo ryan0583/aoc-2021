@@ -37,3 +37,11 @@
     transform: rotate(360deg);
   }
 }
+
+.background-red {
+  background-color: red;
+}
+
+.background-blue {
+  background-color: blue;
+}
