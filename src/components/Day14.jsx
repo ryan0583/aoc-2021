@@ -8,23 +8,30 @@ const Day14 = () => {
   const [part1Result, setPart1Result] = useState();
   const [part2Result, setPart2Result] = useState();
 
-  const performStep = (polymerTemplate, replacements) => {
-    const newPolymerTemplate = [polymerTemplate[0]];
+  const performStep = (pairs, replacements) => {
+    const newPairs = {};
 
-    polymerTemplate.forEach((c, index) => {
-      if (index > 0) {
-        const searchStr = `${polymerTemplate[index - 1]}${c}`;
-        const additionalChar = replacements[searchStr];
-        if (additionalChar) {
-          newPolymerTemplate.push(additionalChar);
-        }
-        newPolymerTemplate.push(c);
+    Object.keys(pairs).forEach((pair) => {
+      if (replacements[pair]) {
+        newPairs[`${pair.slice(0, 1)}${replacements[pair]}`] = newPairs[
+          `${pair.slice(0, 1)}${replacements[pair]}`
+        ]
+          ? newPairs[`${pair.slice(0, 1)}${replacements[pair]}`] + pairs[pair]
+          : pairs[pair];
+
+        newPairs[`${replacements[pair]}${pair.slice(1)}`] = newPairs[
+          `${replacements[pair]}${pair.slice(1)}`
+        ]
+          ? newPairs[`${replacements[pair]}${pair.slice(1)}`] + pairs[pair]
+          : pairs[pair];
+      } else {
+        newPairs[pair] = pairs[pair];
       }
     });
-    return newPolymerTemplate;
+    return newPairs;
   };
 
-  const findPart1Answer = () => {
+  const common = (steps, setFn) => {
     console.log(input);
 
     const replacements = input
@@ -40,38 +47,48 @@ const Day14 = () => {
       }, {});
     let polymerTemplate = input[0].split('');
 
-    console.log(polymerTemplate);
-    console.log(replacements);
+    let pairs = polymerTemplate.reduce((acc, val, index) => {
+      const newObj = { ...acc };
+      if (polymerTemplate[index - 1]) {
+        newObj[`${polymerTemplate[index - 1]}${val}`] = acc[
+          `${polymerTemplate[index - 1]}${val}`
+        ]
+          ? acc[`${polymerTemplate[index - 1]}${val}`] + 1
+          : 1;
+      }
+
+      return newObj;
+    }, {});
 
     let step = 0;
 
-    while (step < 40) {
+    while (step < steps) {
       console.log(step);
-      polymerTemplate = performStep(polymerTemplate, replacements);
+      pairs = performStep(pairs, replacements);
 
       step = step + 1;
     }
 
-    const charCounts = polymerTemplate.reduce(
-      (acc, c) => ({
+    const charCounts = Object.keys(pairs).reduce(
+      (acc, pair) => ({
         ...acc,
-        [c]: (acc[c] || 0) + 1,
+        [pair.slice(1)]: (acc[pair.slice(1)] || 0) + pairs[pair],
       }),
       {}
     );
 
-    console.log(Object.values(charCounts));
-
     const max = Math.max(...Object.values(charCounts));
     const min = Math.min(...Object.values(charCounts));
 
-    console.log(max);
+    setFn(max - min);
+  };
 
-    setPart1Result(max - min);
+  const findPart1Answer = () => {
+    common(10, setPart1Result);
   };
 
   const findPart2Answer = () => {
-    console.log(input);
+    common(40, setPart2Result);
   };
 
   useEffect(() => {
@@ -99,11 +116,11 @@ const Day14 = () => {
       Day 14
       <div className="flex">
         <button onClick={part1}>part 1</button>
-        {part1Result && `${part1Result}`}
+        {part1Result && ` ${part1Result}`}
       </div>
       <div className="flex">
         <button onClick={part2}>part 2</button>
-        {part2Result && `${part2Result}`}
+        {part2Result && ` ${part2Result}`}
       </div>
     </div>
   );
